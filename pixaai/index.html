@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="en" class="tw-dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OCR-SEC: Structuring Chaos - LLM-Powered Table Extraction</title>
+    <meta
+      name="description"
+      content="Transform scanned financial statements into clean, validated, exportable tables using custom OCR and LLM agents. 99.5% extraction accuracy."
+    />
+    <link
+      rel="shortcut icon"
+      href="./assets/logo/logo.png"
+      type="image/x-icon"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta
+      property="og:title"
+      content="OCR-SEC: Structuring Chaos - LLM-Powered Table Extraction"
+    />
+    <meta
+      property="og:description"
+      content="Transform scanned financial statements into clean, validated, exportable tables using custom OCR and LLM agents."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://github.com/ocr-sec" />
+    <meta property="og:image" content="" />
+
+    <!-- <link rel="stylesheet" href="css/tailwind-runtime.css" /> -->
+    <link rel="stylesheet" href="css/tailwind-build.css" />
+    <link rel="stylesheet" href="css/index.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
+      integrity="sha512-dPXYcDub/aeb08c63jRq/k6GaKccl256JQy/AnOq7CAnEZ9FzSL9wSbcZkMp4R26vBsMLFYH4kQ67/bbV8XaCQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      gtag("config", "G-");
+    </script>
+  </head>
+  <body
+    class="tw-flex tw-min-h-[100vh] tw-flex-col tw-bg-[#fcfcfc] tw-text-black dark:tw-bg-black dark:tw-text-white"
+  >
+    <!-- ================= OCR-SEC NAVBAR START ================= -->
+    <header
+      class="lg:tw-px-4 tw-max-w-[100vw] tw-max-w-lg:tw-mr-auto max-lg:tw-top-0 tw-fixed tw-top-4 lg:tw-left-1/2 lg:tw--translate-x-1/2 tw-z-20 tw-flex tw-h-[60px] tw-w-full tw-text-gray-700 tw-bg-white dark:tw-text-gray-200 dark:tw-bg-[#17181b] tw-px-[3%] tw-rounded-md lg:tw-max-w-5xl tw-shadow-md dark:tw-shadow-gray-700 lg:tw-justify-around lg:!tw-backdrop-blur-lg lg:tw-opacity-[0.99]"
+    >
+      <a class="tw-flex tw-p-[4px] tw-gap-2 tw-place-items-center" href="#home">
+        <div class="tw-h-[30px] tw-max-w-[100px]">
+          <img
+            src="./assets/logo/logo.png"
+            alt="OCR-SEC Logo"
+            class="tw-object-contain tw-h-full tw-w-full dark:tw-invert"
+          />
+        </div>
+        <span class="tw-uppercase tw-text-base tw-font-semibold">OCR-SEC</span>
+      </a>
+      <div
+        class="collapsible-header animated-collapse max-lg:tw-shadow-md"
+        id="collapsed-header-items"
+      >
+        <nav
+          class="tw-relative tw-flex tw-h-full max-lg:tw-h-max tw-w-max tw-gap-5 tw-text-base max-lg:tw-mt-[30px] max-lg:tw-flex-col max-lg:tw-gap-5 lg:tw-mx-auto tw-place-items-center"
+        >
+          <a class="header-links" href="#home">Home</a>
+          <a class="header-links" href="#features">Features</a>
+          <a class="header-links" href="#why">Why OCR-SEC</a>
+          <a class="header-links" href="#docs">Docs</a>
+          <a class="header-links" href="#contact">Contact</a>
+        </nav>
+        <div
+          class="lg:tw-mx-4 tw-flex tw-place-items-center tw-gap-[20px] tw-text-base max-md:tw-w-full max-md:tw-flex-col max-md:tw-place-content-center"
+        >
+          <button
+            type="button"
+            onclick="toggleMode()"
+            class="header-links tw-text-gray-600 dark:tw-text-gray-300"
+            title="toggle-theme"
+            id="theme-toggle"
+          >
+            <i class="bi bi-sun" id="toggle-mode-icon"></i>
+          </button>
+          <a
+            href="#demo"
+            aria-label="Request Access"
+            class="btn tw-flex tw-gap-3 tw-px-3 tw-py-2 tw-transition-transform tw-duration-[0.3s] hover:tw-translate-x-2"
+          >
+            <span>Request Access</span>
+            <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+      <button
+        class="bi bi-list tw-absolute tw-right-3 tw-top-3 tw-z-50 tw-text-3xl tw-text-gray-500 lg:tw-hidden"
+        onclick="toggleHeader()"
+        aria-label="menu"
+        id="collapse-btn"
+      ></button>
+    </header>
+    <!-- ================= OCR-SEC NAVBAR END ================= -->
+
+    <!-- ================= OCR-SEC HERO SECTION START ================= -->
+    <section
+      class="hero-section tw-relative tw-mt-20 tw-flex tw-min-h-[100vh] tw-w-full tw-max-w-[100vw] tw-flex-col tw-overflow-hidden max-lg:tw-mt-[100px]"
+      id="hero-section"
+    >
+      <div
+        class="hero-bg-gradient tw-relative tw-flex tw-h-full tw-min-h-[100vh] tw-w-full tw-flex-col tw-place-content-center tw-gap-6 tw-p-[5%] max-xl:tw-place-items-center max-lg:tw-p-4"
+      >
+        <div
+          class="tw-flex tw-flex-col tw-min-h-[60vh] tw-place-content-center tw-items-center tw-z-10"
+        >
+          <h1
+            class="reveal-up tw-text-center tw-text-5xl md:tw-text-7xl tw-font-bold tw-uppercase tw-leading-[90px] max-lg:tw-text-4xl max-md:tw-leading-snug"
+          >
+            Structuring Chaos:
+            <span class="tw-text-primary">LLM-Powered Table Extraction</span>
+          </h1>
+          <p
+            class="reveal-up tw-mt-8 tw-max-w-[600px] tw-text-lg max-lg:tw-text-base tw-p-2 tw-text-center tw-text-gray-800 dark:tw-text-white max-lg:tw-max-w-full"
+          >
+            Transform scanned financial statements into clean, validated,
+            exportable tables—powered by custom OCR and LLM agents.
+          </p>
+          <div
+            class="reveal-up tw-mt-10 max-md:tw-flex-col tw-flex tw-place-items-center tw-gap-4"
+          >
+            <a
+              class="btn tw-group max-lg:!tw-w-[160px] tw-flex tw-gap-2 tw-shadow-lg !tw-w-[170px] !tw-rounded-xl !tw-py-4 max-lg:!tw-py-2 tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.03]"
+              href="#"
+              download
+            >
+              <span>Download Whitepaper</span>
+              <i
+                class="bi bi-file-earmark-arrow-down group-hover:tw-translate-x-1 tw-duration-300"
+              ></i>
+            </a>
+            <a
+              class="btn !tw-w-[170px] max-lg:!tw-w-[160px] !tw-rounded-xl !tw-py-4 max-lg:!tw-py-2 tw-flex tw-gap-2 tw-group !tw-bg-transparent !tw-text-black dark:!tw-text-white tw-transition-colors tw-duration-[0.3s] tw-border-[1px] tw-border-black dark:tw-border-white"
+              href="#demo-video"
+            >
+              <div
+                class="tw-relative tw-flex tw-place-items-center tw-place-content-center tw-w-6 tw-h-6"
+              >
+                <span class="bi bi-play-circle-fill"></span>
+              </div>
+              <span>Watch Demo</span>
+            </a>
+          </div>
+          <div class="tw-mt-6 tw-text-xl tw-font-semibold tw-text-primary">
+            99.5% Extraction Accuracy
+          </div>
+        </div>
+        <div class="tw-flex tw-justify-center tw-items-center tw-mt-12">
+          <!-- Hero visual placeholder: Replace src with your hero image when ready -->
+          <img
+            src="./assets/logo/logo.png"
+            alt="OCR-SEC Hero Visual"
+            class="tw-w-[350px] tw-h-auto tw-rounded-2xl tw-shadow-lg tw-bg-white/80 tw-p-6"
+          />
+        </div>
+      </div>
+    </section>
+    <!-- ================= OCR-SEC HERO SECTION END ================= -->
+
+    <!-- ================= CREDIBILITY LOGOS SECTION START ================= -->
+    <section
+      class="tw-relative tw-flex tw-w-full tw-max-w-[100vw] tw-flex-col tw-place-content-center tw-place-items-center tw-overflow-hidden tw-py-12 tw-px-8"
+    >
+      <h2
+        class="reveal-up tw-text-2xl tw-text-center tw-text-gray-600 dark:tw-text-gray-300 tw-mb-8"
+      >
+        Sponsored by leading institutions
+      </h2>
+      <div
+        class="reveal-up tw-flex tw-justify-center tw-items-center tw-gap-12 tw-flex-wrap max-md:tw-gap-8"
+      >
+        <!-- Duke University Logo -->
+        <div
+          class="tw-h-[60px] tw-w-[200px] tw-flex tw-items-center tw-justify-center"
+        >
+          <img
+            src="./assets/images/brand-logos/google.svg"
+            alt="Duke University"
+            class="tw-h-full tw-w-full tw-object-contain tw-grayscale hover:tw-grayscale-0 tw-transition-all tw-duration-300"
+          />
+          <span
+            class="tw-text-sm tw-ml-2 tw-text-gray-600 dark:tw-text-gray-400"
+            >Duke University</span
+          >
+        </div>
+        <!-- Savronik Logo -->
+        <div
+          class="tw-h-[60px] tw-w-[200px] tw-flex tw-items-center tw-justify-center"
+        >
+          <img
+            src="./assets/images/brand-logos/microsoft.svg"
+            alt="Savronik"
+            class="tw-h-full tw-w-full tw-object-contain tw-grayscale hover:tw-grayscale-0 tw-transition-all tw-duration-300"
+          />
+          <span
+            class="tw-text-sm tw-ml-2 tw-text-gray-600 dark:tw-text-gray-400"
+            >Savronik</span
+          >
+        </div>
+        <!-- METU Logo -->
+        <div
+          class="tw-h-[60px] tw-w-[200px] tw-flex tw-items-center tw-justify-center"
+        >
+          <img
+            src="./assets/images/brand-logos/adobe.svg"
+            alt="Middle East Technical University"
+            class="tw-h-full tw-w-full tw-object-contain tw-grayscale hover:tw-grayscale-0 tw-transition-all tw-duration-300"
+          />
+          <span
+            class="tw-text-sm tw-ml-2 tw-text-gray-600 dark:tw-text-gray-400"
+            >METU</span
+          >
+        </div>
+      </div>
+    </section>
+    <!-- ================= CREDIBILITY LOGOS SECTION END ================= -->
+
+    <!-- ================= OCR-SEC FEATURES SECTION START ================= -->
+    <section
+      class="tw-relative tw-flex tw-max-w-[100vw] tw-flex-col tw-place-content-center tw-place-items-center tw-overflow-hidden tw-py-16"
+      id="features"
+    >
+      <div
+        class="tw-mt-8 tw-flex tw-flex-col tw-w-full tw-h-full tw-place-items-center tw-gap-12"
+      >
+        <div
+          class="reveal-up tw-mt-5 tw-flex tw-flex-col tw-gap-3 tw-text-center"
+        >
+          <h2 class="tw-text-6xl tw-font-medium max-md:tw-text-3xl tw-p-2">
+            OCR-SEC Pipeline
+          </h2>
+          <p
+            class="tw-text-lg tw-text-gray-600 dark:tw-text-gray-300 tw-max-w-[800px] tw-mx-auto"
+          >
+            A comprehensive 6-stage pipeline for transforming chaotic financial
+            documents into structured, actionable data.
+          </p>
+        </div>
+
+        <!-- Features Grid -->
+        <div
+          class="tw-mt-6 tw-flex tw-flex-col tw-max-w-[1150px] max-lg:tw-max-w-full tw-h-full tw-p-4 max-lg:tw-place-content-center tw-gap-12"
+        >
+          <!-- Feature 1: Capture Clean Centralize (Full Width) -->
+          <div class="reveal-up tw-w-full tw-h-auto tw-flex">
+            <div
+              class="tw-relative tw-p-8 tw-transition-all tw-duration-300 tw-gap-6 tw-flex max-md:tw-flex-col tw-w-full tw-h-full tw-bg-[#f6f7fb] dark:tw-bg-[#171717] tw-rounded-3xl hover:tw-scale-[1.02]"
+            >
+              <div class="tw-flex tw-flex-col tw-gap-4 tw-flex-1">
+                <div class="tw-flex tw-items-center tw-gap-4">
+                  <div
+                    class="tw-w-16 tw-h-16 tw-bg-yellow-500 tw-rounded-xl tw-flex tw-items-center tw-justify-center"
+                  >
+                    <i class="bi bi-upload tw-text-2xl tw-text-white"></i>
+                  </div>
+                  <h3 class="tw-text-3xl max-md:tw-text-2xl tw-font-medium">
+                    Capture • Clean • Centralize
+                  </h3>
+                </div>
+                <p
+                  class="tw-leading-normal tw-text-gray-800 dark:tw-text-gray-200"
+                >
+                  Import documents via upload or URL, apply flexible
+                  preprocessing (deskew, denoise, adaptive thresholding), and
+                  keep everything centralized for streamlined access.
+                </p>
+                <ul
+                  class="tw-list-disc tw-list-inside tw-text-gray-700 dark:tw-text-gray-300"
+                >
+                  <li>Multi-format document support (PDF, PNG, JPG)</li>
+                  <li>Automated preprocessing pipeline</li>
+                  <li>Centralized document management</li>
+                </ul>
+              </div>
+              <div
+                class="tw-w-full max-md:tw-w-full tw-h-[200px] tw-rounded-xl tw-overflow-hidden tw-bg-gradient-to-br tw-from-yellow-100 tw-to-yellow-200 dark:tw-from-yellow-900 dark:tw-to-yellow-800"
+              >
+                <img
+                  src="./assets/images/home/import.png"
+                  class="tw-w-full tw-h-full tw-object-cover"
+                  alt="Document Import Process"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Features 2 & 3: Document Digitization and Refined Accuracy (Half Width) -->
+          <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-8">
+            <!-- Feature 2: Document Digitization -->
+            <div class="reveal-up tw-w-full tw-h-[450px] tw-flex">
+              <div
+                class="tw-relative tw-p-8 tw-transition-all tw-duration-300 tw-gap-5 tw-flex tw-flex-col tw-w-full tw-h-full tw-bg-[#f6f7fb] dark:tw-bg-[#171717] tw-rounded-3xl hover:tw-scale-[1.02]"
+              >
+                <div class="tw-flex tw-items-center tw-gap-4">
+                  <div
+                    class="tw-w-16 tw-h-16 tw-bg-blue-500 tw-rounded-xl tw-flex tw-items-center tw-justify-center"
+                  >
+                    <i class="bi bi-eye tw-text-2xl tw-text-white"></i>
+                  </div>
+                  <h3 class="tw-text-2xl max-md:tw-text-xl tw-font-medium">
+                    Document Digitization
+                  </h3>
+                </div>
+                <div
+                  class="tw-w-full tw-h-[120px] tw-rounded-xl tw-overflow-hidden tw-bg-gradient-to-br tw-from-blue-100 tw-to-blue-200 dark:tw-from-blue-900 dark:tw-to-blue-800"
+                >
+                  <img
+                    src="./assets/images/home/unified.jpg"
+                    class="tw-w-full tw-h-full tw-object-cover"
+                    alt="OCR Processing"
+                  />
+                </div>
+                <p
+                  class="tw-leading-normal tw-text-gray-800 dark:tw-text-gray-200"
+                >
+                  Transform scanned documents into structured tables using
+                  custom, cutting-edge extraction models powered by Optical
+                  Character Recognition, each tailored to specific document
+                  types for maximum accuracy.
+                </p>
+              </div>
+            </div>
+
+            <!-- Feature 3: Refined Accuracy -->
+            <div class="reveal-up tw-w-full tw-h-[450px] tw-flex">
+              <div
+                class="tw-relative tw-p-8 tw-transition-all tw-duration-300 tw-gap-5 tw-flex tw-flex-col tw-w-full tw-h-full tw-bg-[#f6f7fb] dark:tw-bg-[#171717] tw-rounded-3xl hover:tw-scale-[1.02]"
+              >
+                <div class="tw-flex tw-items-center tw-gap-4">
+                  <div
+                    class="tw-w-16 tw-h-16 tw-bg-purple-500 tw-rounded-xl tw-flex tw-items-center tw-justify-center"
+                  >
+                    <i class="bi bi-cpu tw-text-2xl tw-text-white"></i>
+                  </div>
+                  <h3 class="tw-text-2xl max-md:tw-text-xl tw-font-medium">
+                    Refined Accuracy
+                  </h3>
+                </div>
+                <div
+                  class="tw-w-full tw-h-[120px] tw-rounded-xl tw-overflow-hidden tw-bg-gradient-to-br tw-from-purple-100 tw-to-purple-200 dark:tw-from-purple-900 dark:tw-to-purple-800"
+                >
+                  <img
+                    src="./assets/images/home/ai-models.png"
+                    class="tw-w-full tw-h-full tw-object-cover"
+                    alt="LLM Processing"
+                  />
+                </div>
+                <p
+                  class="tw-leading-normal tw-text-gray-800 dark:tw-text-gray-200"
+                >
+                  Use LLM agents for post-OCR processing to clean, validate, and
+                  format extracted data into structured formats.
+                  <strong>Precision meets automation.</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Features 4 & 5: Human-in-Loop and Exportable Data (Half Width) -->
+          <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-8">
+            <!-- Feature 4: Human-in-the-Loop Validation -->
+            <div class="reveal-up tw-w-full tw-h-[450px] tw-flex">
+              <div
+                class="tw-relative tw-p-8 tw-transition-all tw-duration-300 tw-gap-5 tw-flex tw-flex-col tw-w-full tw-h-full tw-bg-[#f6f7fb] dark:tw-bg-[#171717] tw-rounded-3xl hover:tw-scale-[1.02]"
+              >
+                <div class="tw-flex tw-items-center tw-gap-4">
+                  <div
+                    class="tw-w-16 tw-h-16 tw-bg-green-500 tw-rounded-xl tw-flex tw-items-center tw-justify-center"
+                  >
+                    <i class="bi bi-person-check tw-text-2xl tw-text-white"></i>
+                  </div>
+                  <h3 class="tw-text-2xl max-md:tw-text-xl tw-font-medium">
+                    Human-in-the-Loop Validation
+                  </h3>
+                </div>
+                <div
+                  class="tw-w-full tw-h-[120px] tw-rounded-xl tw-overflow-hidden tw-bg-gradient-to-br tw-from-green-100 tw-to-green-200 dark:tw-from-green-900 dark:tw-to-green-800"
+                >
+                  <img
+                    src="./assets/images/home/history.png"
+                    class="tw-w-full tw-h-full tw-object-cover"
+                    alt="Human Validation"
+                  />
+                </div>
+                <p
+                  class="tw-leading-normal tw-text-gray-800 dark:tw-text-gray-200"
+                >
+                  Perform human validation by reviewing suggestions from our
+                  validation agent and correcting the digitized report while
+                  comparing it with the original image.
+                </p>
+              </div>
+            </div>
+
+            <!-- Feature 5: Exportable Financial Data -->
+            <div class="reveal-up tw-w-full tw-h-[450px] tw-flex">
+              <div
+                class="tw-relative tw-p-8 tw-transition-all tw-duration-300 tw-gap-5 tw-flex tw-flex-col tw-w-full tw-h-full tw-bg-[#f6f7fb] dark:tw-bg-[#171717] tw-rounded-3xl hover:tw-scale-[1.02]"
+              >
+                <div class="tw-flex tw-items-center tw-gap-4">
+                  <div
+                    class="tw-w-16 tw-h-16 tw-bg-orange-500 tw-rounded-xl tw-flex tw-items-center tw-justify-center"
+                  >
+                    <i
+                      class="bi bi-file-earmark-spreadsheet tw-text-2xl tw-text-white"
+                    ></i>
+                  </div>
+                  <h3 class="tw-text-2xl max-md:tw-text-xl tw-font-medium">
+                    Exportable Financial Data
+                  </h3>
+                </div>
+                <div
+                  class="tw-w-full tw-h-[120px] tw-rounded-xl tw-overflow-hidden tw-bg-gradient-to-br tw-from-orange-100 tw-to-orange-200 dark:tw-from-orange-900 dark:tw-to-orange-800"
+                >
+                  <img
+                    src="./assets/images/home/image.png"
+                    class="tw-w-full tw-h-full tw-object-cover"
+                    alt="Data Export"
+                  />
+                </div>
+                <p
+                  class="tw-leading-normal tw-text-gray-800 dark:tw-text-gray-200"
+                >
+                  Export structured data with ease. Generate datasets ready for
+                  research, compliance, or archival in multiple formats
+                  including CSV.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature 6: Talk to Your Data (Full Width) -->
+          <div class="reveal-up tw-w-full tw-h-auto tw-flex">
+            <div
+              class="tw-relative tw-p-8 tw-transition-all tw-duration-300 tw-gap-6 tw-flex max-md:tw-flex-col tw-w-full tw-h-full tw-bg-[#f6f7fb] dark:tw-bg-[#171717] tw-rounded-3xl hover:tw-scale-[1.02]"
+            >
+              <div class="tw-flex tw-flex-col tw-gap-4 tw-flex-1">
+                <div class="tw-flex tw-items-center tw-gap-4">
+                  <div
+                    class="tw-w-16 tw-h-16 tw-bg-teal-500 tw-rounded-xl tw-flex tw-items-center tw-justify-center"
+                  >
+                    <i class="bi bi-chat-dots tw-text-2xl tw-text-white"></i>
+                  </div>
+                  <h3 class="tw-text-3xl max-md:tw-text-2xl tw-font-medium">
+                    Talk to Your Data
+                  </h3>
+                </div>
+                <p
+                  class="tw-leading-normal tw-text-gray-800 dark:tw-text-gray-200"
+                >
+                  Our LLM-powered chatbot lets users query complex datasets in
+                  plain English, no technical expertise needed.
+                  <strong>Get answers, not headaches.</strong>
+                </p>
+                <ul
+                  class="tw-list-disc tw-list-inside tw-text-gray-700 dark:tw-text-gray-300"
+                >
+                  <li>Natural language queries</li>
+                  <li>Instant insights from your data</li>
+                  <li>No SQL or technical knowledge required</li>
+                </ul>
+              </div>
+              <div
+                class="tw-w-full max-md:tw-w-full tw-h-[200px] tw-rounded-xl tw-overflow-hidden tw-bg-gradient-to-br tw-from-teal-100 tw-to-teal-200 dark:tw-from-teal-900 dark:tw-to-teal-800"
+              >
+                <img
+                  src="./assets/images/home/websearch.png"
+                  class="tw-w-full tw-h-full tw-object-cover"
+                  alt="AI Chatbot Interface"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ================= OCR-SEC FEATURES SECTION END ================= -->
+
+    <!-- ================= WHY CHOOSE OCR-SEC SECTION START ================= -->
+    <section
+      class="tw-relative tw-flex tw-w-full tw-min-h-[100vh] tw-flex-col tw-place-content-center tw-place-items-center tw-overflow-hidden tw-py-16"
+      id="why"
+    >
+      <div
+        class="tw-w-full max-lg:tw-max-w-full tw-place-content-center tw-items-center tw-flex tw-flex-col tw-max-w-[80%] tw-gap-4 tw-p-4"
+      >
+        <h3
+          class="reveal-up tw-text-5xl tw-font-medium max-md:tw-text-3xl tw-text-center tw-leading-normal"
+        >
+          Why Choose OCR-SEC?
+        </h3>
+        <p
+          class="reveal-up tw-mt-3 tw-max-w-[800px] tw-text-center tw-text-lg tw-text-gray-600 dark:tw-text-gray-300"
+        >
+          OCR-SEC combines cutting-edge technology with human expertise to
+          deliver unparalleled accuracy in financial document processing.
+        </p>
+
+        <!-- Why Choose Us Grid -->
+        <div
+          class="tw-mt-12 tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-8 tw-w-full tw-max-w-[1200px]"
+        >
+          <!-- Strength 1: Custom OCR Models -->
+          <div
+            class="reveal-up tw-flex tw-flex-col tw-items-center tw-text-center tw-p-6 tw-rounded-xl tw-bg-white dark:tw-bg-[#171717] tw-shadow-lg hover:tw-shadow-xl tw-transition-all tw-duration-300"
+          >
+            <div
+              class="tw-w-16 tw-h-16 tw-bg-blue-500 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mb-4"
+            >
+              <i class="bi bi-cpu-fill tw-text-2xl tw-text-white"></i>
+            </div>
+            <h4 class="tw-text-xl tw-font-semibold tw-mb-3">
+              Custom OCR Models
+            </h4>
+            <p class="tw-text-gray-600 dark:tw-text-gray-300 tw-text-sm">
+              Extraction models trained specifically on financial statements—no
+              one-size-fits-all approach.
+            </p>
+          </div>
+
+          <!-- Strength 2: LLM-Driven Validation -->
+          <div
+            class="reveal-up tw-flex tw-flex-col tw-items-center tw-text-center tw-p-6 tw-rounded-xl tw-bg-white dark:tw-bg-[#171717] tw-shadow-lg hover:tw-shadow-xl tw-transition-all tw-duration-300"
+          >
+            <div
+              class="tw-w-16 tw-h-16 tw-bg-purple-500 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mb-4"
+            >
+              <i class="bi bi-robot tw-text-2xl tw-text-white"></i>
+            </div>
+            <h4 class="tw-text-xl tw-font-semibold tw-mb-3">
+              LLM-Driven Validation
+            </h4>
+            <p class="tw-text-gray-600 dark:tw-text-gray-300 tw-text-sm">
+              Post-OCR cleaning & formatting powered by GPT-style
+              agents—accuracy meets automation.
+            </p>
+          </div>
+
+          <!-- Strength 3: Human-in-Loop Review -->
+          <div
+            class="reveal-up tw-flex tw-flex-col tw-items-center tw-text-center tw-p-6 tw-rounded-xl tw-bg-white dark:tw-bg-[#171717] tw-shadow-lg hover:tw-shadow-xl tw-transition-all tw-duration-300"
+          >
+            <div
+              class="tw-w-16 tw-h-16 tw-bg-green-500 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mb-4"
+            >
+              <i class="bi bi-person-check-fill tw-text-2xl tw-text-white"></i>
+            </div>
+            <h4 class="tw-text-xl tw-font-semibold tw-mb-3">
+              Human-in-Loop Review
+            </h4>
+            <p class="tw-text-gray-600 dark:tw-text-gray-300 tw-text-sm">
+              Review & correct digitized tables side by side with original
+              scans—ensuring total reliability.
+            </p>
+          </div>
+
+          <!-- Strength 4: Exportable Data & Chatbot -->
+          <div
+            class="reveal-up tw-flex tw-flex-col tw-items-center tw-text-center tw-p-6 tw-rounded-xl tw-bg-white dark:tw-bg-[#171717] tw-shadow-lg hover:tw-shadow-xl tw-transition-all tw-duration-300"
+          >
+            <div
+              class="tw-w-16 tw-h-16 tw-bg-orange-500 tw-rounded-full tw-flex tw-items-center tw-justify-center tw-mb-4"
+            >
+              <i class="bi bi-chat-square-text tw-text-2xl tw-text-white"></i>
+            </div>
+            <h4 class="tw-text-xl tw-font-semibold tw-mb-3">
+              Exportable Data & Chatbot
+            </h4>
+            <p class="tw-text-gray-600 dark:tw-text-gray-300 tw-text-sm">
+              Download clean CSVs or query your tables in plain English—no
+              technical skills needed.
+            </p>
+          </div>
+        </div>
+
+        <!-- Key Stats -->
+        <div
+          class="tw-mt-16 tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-8 tw-w-full tw-max-w-[800px]"
+        >
+          <div class="reveal-up tw-text-center tw-p-6">
+            <div class="tw-text-4xl tw-font-bold tw-text-blue-500 tw-mb-2">
+              99.5%
+            </div>
+            <div class="tw-text-lg tw-text-gray-600 dark:tw-text-gray-300">
+              Extraction Accuracy
+            </div>
+          </div>
+          <div class="reveal-up tw-text-center tw-p-6">
+            <div class="tw-text-4xl tw-font-bold tw-text-green-500 tw-mb-2">
+              6-Stage
+            </div>
+            <div class="tw-text-lg tw-text-gray-600 dark:tw-text-gray-300">
+              Processing Pipeline
+            </div>
+          </div>
+          <div class="reveal-up tw-text-center tw-p-6">
+            <div class="tw-text-4xl tw-font-bold tw-text-purple-500 tw-mb-2">
+              Multi-Format
+            </div>
+            <div class="tw-text-lg tw-text-gray-600 dark:tw-text-gray-300">
+              Export Options
+            </div>
+          </div>
+        </div>
+
+        <a
+          href="#demo"
+          class="reveal-up tw-group tw-shadow-xl btn tw-flex tw-gap-2 tw-mt-10 tw-text-lg tw-px-8 tw-py-4"
+        >
+          <span>Try OCR-SEC Demo</span>
+          <i
+            class="bi bi-arrow-right tw-duration-300 group-hover:tw-translate-x-1"
+          ></i>
+        </a>
+      </div>
+    </section>
+    <!-- ================= WHY CHOOSE OCR-SEC SECTION END ================= -->
+
+    <section
+      class="tw-relative tw-flex tw-w-full tw-min-h-[100vh] tw-flex-col tw-place-content-center tw-place-items-center tw-overflow-hidden"
+    >
+      <div
+        class="tw-w-full max-lg:tw-max-w-full tw-place-content-center tw-items-center tw-flex tw-flex-col tw-max-w-[80%] tw-gap-4 tw-p-4"
+      >
+        <h3
+          class="reveal-up tw-text-5xl tw-font-medium max-md:tw-text-3xl tw-text-center tw-leading-normal"
+        >
+          One Subscription for it all
+        </h3>
+        <p class="reveal-up tw-mt-3 tw-max-w-[600px] tw-text-center">
+          Why pay for multiple expensive subscriptions when one subscription can
+          do it all? Access multiple AI models and save 1000's of dollar per
+          year.
+        </p>
+
+        <div class="tw-mt-8 tw-relative tw-flex max-lg:tw-flex-col tw-gap-5">
+          <div
+            class="reveal-up tw-flex tw-w-full tw-max-w-[650px] max-md:tw-max-w-full tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-[1px] tw-border-outlineColor tw-bg-white dark:tw-bg-[#080808] dark:tw-border-[#1f2123] tw-p-2 tw-shadow-xl max-lg:tw-w-[320px]"
+          >
+            <img src="./assets/images/home/multi-sub.png" alt="Multi sub" />
+          </div>
+
+          <div
+            class="reveal-up tw-flex tw-w-full tw-max-w-[650px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-[1px] tw-border-outlineColor tw-bg-white dark:tw-bg-[#080808] dark:tw-border-[#1f2123] tw-p-2 tw-shadow-xl max-lg:tw-w-[320px]"
+          >
+            <img src="./assets/images/home/single-sub.jpg" alt="Single sub" />
+          </div>
+        </div>
+
+        <a
+          href="#"
+          class="reveal-up tw-group tw-shadow-xl btn tw-flex tw-gap-2 tw-mt-10"
+        >
+          <span>Start Chat</span>
+          <i
+            class="bi bi-arrow-right tw-duration-300 group-hover:tw-translate-x-1"
+          ></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- ================= TEAM/RESEARCH SECTION START ================= -->
+    <section
+      class="tw-flex tw-min-h-[100vh] tw-w-full tw-flex-col tw-place-content-center tw-place-items-center tw-p-[2%] tw-py-16"
+    >
+      <h3
+        class="reveal-up tw-text-4xl tw-font-medium tw-text-center max-md:tw-text-2xl tw-mb-4"
+      >
+        Meet the OCR-SEC Research Team
+      </h3>
+      <p
+        class="reveal-up tw-text-lg tw-text-center tw-text-gray-600 dark:tw-text-gray-300 tw-max-w-[800px] tw-mb-12"
+      >
+        A collaborative effort between leading academics and talented students,
+        bringing together expertise in computer vision, machine learning, and
+        document processing.
+      </p>
+
+      <!-- Supervisor Section -->
+      <div
+        class="reveal-up tw-mb-16 tw-text-center tw-p-8 tw-bg-gradient-to-r tw-from-blue-50 tw-to-purple-50 dark:tw-from-blue-900/20 dark:tw-to-purple-900/20 tw-rounded-2xl tw-max-w-[600px]"
+      >
+        <h4 class="tw-text-2xl tw-font-bold tw-mb-2">Project Supervisor</h4>
+        <h5
+          class="tw-text-xl tw-font-semibold tw-text-blue-600 dark:tw-text-blue-400 tw-mb-2"
+        >
+          Prof. Fatoş Tunay Yarman Vural
+        </h5>
+        <p class="tw-text-gray-600 dark:tw-text-gray-300">
+          Distinguished Professor at Middle East Technical University, leading
+          research in machine learning and computer vision.
+        </p>
+      </div>
+
+      <!-- Team Members -->
+      <div
+        class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 xl:tw-grid-cols-5 tw-gap-8 tw-max-w-[1400px]"
+      >
+        <!-- Team Member 1: Atakan -->
+        <div
+          class="reveal-up tw-flex tw-flex-col tw-items-center tw-text-center tw-p-6 tw-rounded-xl tw-bg-white dark:tw-bg-[#171717] tw-shadow-lg hover:tw-shadow-xl tw-transition-all tw-duration-300"
+        >
+          <div
+            class="tw-h-[100px] tw-w-[100px] tw-overflow-hidden tw-rounded-full tw-mb-4 tw-bg-gradient-to-br tw-from-blue-400 tw-to-blue-600"
+          >
+            <img
+              src="./assets/images/people/man.jpg"
+              class="tw-h-full tw-w-full tw-object-cover"
+              alt="Atakan Öztarak"
+            />
+          </div>
+          <h4 class="tw-font-semibold tw-text-lg tw-mb-1">Atakan Öztarak</h4>
+          <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mb-2">
+            Co-Principal Investigator
+          </p>
+          <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-400">
+            Computer Engineering
+          </p>
+        </div>
+
+        <!-- Team Member 2: Aybüke -->
+        <div
+          class="reveal-up tw-flex tw-flex-col tw-items-center tw-text-center tw-p-6 tw-rounded-xl tw-bg-white dark:tw-bg-[#171717] tw-shadow-lg hover:tw-shadow-xl tw-transition-all tw-duration-300"
+        >
+          <div
+            class="tw-h-[100px] tw-w-[100px] tw-overflow-hidden tw-rounded-full tw-mb-4 tw-bg-gradient-to-br tw-from-purple-400 tw-to-purple-600"
+          >
+            <img
+              src="./assets/images/people/women.jpg"
+              class="tw-h-full tw-w-full tw-object-cover"
+              alt="Aybüke Aksoy"
+            />
+          </div>
+          <h4 class="tw-font-semibold tw-text-lg tw-mb-1">Aybüke Aksoy</h4>
+          <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mb-2">
+            ML Engineer
+          </p>
+          <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-400">
+            Computer Engineering
+          </p>
+        </div>
+
+        <!-- Team Member 3: Barış -->
+        <div
+          class="reveal-up tw-flex tw-flex-col tw-items-center tw-text-center tw-p-6 tw-rounded-xl tw-bg-white dark:tw-bg-[#171717] tw-shadow-lg hover:tw-shadow-xl tw-transition-all tw-duration-300"
+        >
+          <div
+            class="tw-h-[100px] tw-w-[100px] tw-overflow-hidden tw-rounded-full tw-mb-4 tw-bg-gradient-to-br tw-from-green-400 tw-to-green-600"
+          >
+            <img
+              src="./assets/images/people/man2.jpg"
+              class="tw-h-full tw-w-full tw-object-cover"
+              alt="Barış Türnüklü"
+            />
+          </div>
+          <h4 class="tw-font-semibold tw-text-lg tw-mb-1">Barış Türnüklü</h4>
+          <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mb-2">
+            OCR Specialist
+          </p>
+          <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-400">
+            Computer Engineering
+          </p>
+        </div>
+
+        <!-- Team Member 4: Cem Meriç -->
+        <div
+          class="reveal-up tw-flex tw-flex-col tw-items-center tw-text-center tw-p-6 tw-rounded-xl tw-bg-white dark:tw-bg-[#171717] tw-shadow-lg hover:tw-shadow-xl tw-transition-all tw-duration-300"
+        >
+          <div
+            class="tw-h-[100px] tw-w-[100px] tw-overflow-hidden tw-rounded-full tw-mb-4 tw-bg-gradient-to-br tw-from-orange-400 tw-to-orange-600"
+          >
+            <img
+              src="./assets/images/people/man.jpg"
+              class="tw-h-full tw-w-full tw-object-cover"
+              alt="Cem Meriç Şefikoğulları"
+            />
+          </div>
+          <h4 class="tw-font-semibold tw-text-lg tw-mb-1">
+            Cem Meriç Şefikoğulları
+          </h4>
+          <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mb-2">
+            Data Engineer
+          </p>
+          <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-400">
+            Computer Engineering
+          </p>
+        </div>
+
+        <!-- Team Member 5: Emre -->
+        <div
+          class="reveal-up tw-flex tw-flex-col tw-items-center tw-text-center tw-p-6 tw-rounded-xl tw-bg-white dark:tw-bg-[#171717] tw-shadow-lg hover:tw-shadow-xl tw-transition-all tw-duration-300"
+        >
+          <div
+            class="tw-h-[100px] tw-w-[100px] tw-overflow-hidden tw-rounded-full tw-mb-4 tw-bg-gradient-to-br tw-from-teal-400 tw-to-teal-600"
+          >
+            <img
+              src="./assets/images/people/man2.jpg"
+              class="tw-h-full tw-w-full tw-object-cover"
+              alt="Emre Kalkan"
+            />
+          </div>
+          <h4 class="tw-font-semibold tw-text-lg tw-mb-1">Emre Kalkan</h4>
+          <p class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-300 tw-mb-2">
+            Systems Engineer
+          </p>
+          <p class="tw-text-xs tw-text-gray-500 dark:tw-text-gray-400">
+            Computer Engineering
+          </p>
+        </div>
+      </div>
+
+      <!-- Research Institution -->
+      <div
+        class="reveal-up tw-mt-16 tw-text-center tw-p-8 tw-bg-gradient-to-r tw-from-gray-50 tw-to-blue-50 dark:tw-from-gray-900/20 dark:tw-to-blue-900/20 tw-rounded-2xl tw-max-w-[800px]"
+      >
+        <h4 class="tw-text-xl tw-font-bold tw-mb-4">Research Institution</h4>
+        <div class="tw-flex tw-items-center tw-justify-center tw-gap-4 tw-mb-4">
+          <img
+            src="./assets/images/brand-logos/adobe.svg"
+            alt="METU Logo"
+            class="tw-h-12 tw-w-12 tw-object-contain dark:tw-invert"
+          />
+          <div class="tw-text-left">
+            <h5 class="tw-font-semibold tw-text-lg">
+              Middle East Technical University
+            </h5>
+            <p class="tw-text-gray-600 dark:tw-text-gray-300">
+              WINS Lab - Web Intelligence & Semantic Computing
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ================= TEAM/RESEARCH SECTION END ================= -->
+
+    <section
+      class="tw-mt-5 tw-flex tw-w-full tw-flex-col tw-gap-6 tw-place-items-center tw-p-[2%]"
+      id="pricing"
+    >
+      <h3 class="reveal-up tw-text-5xl tw-font-medium max-md:tw-text-2xl">
+        Choose the right plan for you
+      </h3>
+      <!-- pricing -->
+      <div
+        class="tw-mt-10 tw-flex tw-flex-wrap tw-place-content-center tw-gap-8 max-lg:tw-flex-col"
+      >
+        <div
+          class="reveal-up tw-flex tw-w-[350px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-[1px] tw-border-outlineColor tw-bg-white dark:tw-bg-[#080808] dark:tw-border-[#1f2123] tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]"
+        >
+          <h3 class="">
+            <span class="tw-text-5xl max-md:tw-text-3xl tw-font-semibold"
+              >$9</span
+            >
+            <span class="tw-text-2xl tw-text-gray-600 dark:tw-text-gray-300"
+              >/mo</span
+            >
+          </h3>
+          <p
+            class="tw-mt-3 tw-text-center tw-text-gray-800 dark:tw-text-gray-100"
+          >
+            Essential AI tools for everyday use
+          </p>
+          <hr />
+          <ul
+            class="tw-mt-4 tw-flex tw-flex-col tw-gap-4 tw-text-base tw-text-gray-800 dark:tw-text-gray-200"
+          >
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>1,000 AI powered chat messages</span>
+            </li>
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>30 premium image generations</span>
+            </li>
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>10 premium music generation</span>
+            </li>
+
+            <li class="tw-flex tw-gap-2">
+              <i
+                class="bi bi-check-circle-fill tw-text-gray-400 dark:tw-text-gray-500"
+              ></i>
+              <span>Access to all premium AI models</span>
+            </li>
+
+            <li class="tw-flex tw-gap-2">
+              <i
+                class="bi bi-check-circle-fill tw-text-gray-400 dark:tw-text-gray-500"
+              ></i>
+              <span>Early access to new features</span>
+            </li>
+          </ul>
+          <a
+            href="#"
+            class="btn tw-mt-auto !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02] !tw-text-black !tw-bg-transparent !tw-border-[1px] tw-border-black dark:tw-border-white dark:!tw-text-white"
+          >
+            Choose plan
+          </a>
+        </div>
+
+        <div
+          class="reveal-up tw-flex tw-w-[350px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-2 tw-border-outlineColor tw-bg-white dark:tw-bg-[#080808] dark:tw-border-[#595858] tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]"
+        >
+          <h3 class="">
+            <span class="tw-text-5xl max-md:tw-text-3xl tw-font-semibold"
+              >$17</span
+            >
+            <span
+              class="tw-text-2xl max-md:tw-text-xl tw-text-gray-600 dark:tw-text-gray-300"
+              >/mo</span
+            >
+          </h3>
+          <p
+            class="tw-mt-3 tw-text-center tw-text-gray-800 dark:tw-text-gray-200"
+          >
+            Advanced features for serious AI enthusiasts.
+          </p>
+          <hr />
+          <ul
+            class="tw-mt-4 tw-flex tw-flex-col tw-gap-4 tw-text-base tw-text-gray-800 dark:tw-text-gray-100"
+          >
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>5,000 AI powered chat messages</span>
+            </li>
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>100 premium image generations</span>
+            </li>
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>40 premium music generation</span>
+            </li>
+
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Access to all premium AI models</span>
+            </li>
+
+            <li class="tw-flex tw-gap-2">
+              <i
+                class="bi bi-check-circle-fill tw-text-gray-400 dark:tw-text-gray-500"
+              ></i>
+              <span>Early access to new features</span>
+            </li>
+          </ul>
+          <a
+            href="#"
+            class="btn tw-mt-auto !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02]"
+          >
+            Choose plan
+          </a>
+        </div>
+
+        <div
+          class="reveal-up tw-flex tw-w-[350px] tw-flex-col tw-place-items-center tw-gap-2 tw-rounded-lg tw-border-[1px] tw-border-outlineColor dark:tw-bg-[#080808] dark:tw-border-[#1f2123] tw-bg-white tw-p-8 tw-shadow-xl max-lg:tw-w-[320px]"
+        >
+          <h3 class="">
+            <span class="tw-text-5xl max-md:tw-text-3xl tw-font-semibold"
+              >$29</span
+            >
+            <span class="tw-text-2xl tw-text-gray-600 dark:tw-text-gray-300"
+              >/mo</span
+            >
+          </h3>
+          <p
+            class="tw-mt-3 tw-text-center tw-text-gray-800 dark:tw-text-gray-100"
+          >
+            Unlimited potential for power users
+          </p>
+          <hr />
+          <ul
+            class="tw-mt-4 tw-flex tw-flex-col tw-gap-4 tw-text-base tw-text-gray-800 dark:tw-text-gray-200"
+          >
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>10,000 AI powered chat messages</span>
+            </li>
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>300 premium image generations</span>
+            </li>
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>100 premium music generations</span>
+            </li>
+
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Access to all premium AI models</span>
+            </li>
+
+            <li class="tw-flex tw-gap-2">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Early access to new features</span>
+            </li>
+          </ul>
+          <a
+            href="#"
+            class="btn tw-mt-8 !tw-w-full tw-transition-transform tw-duration-[0.3s] hover:tw-scale-x-[1.02] !tw-text-black !tw-bg-transparent !tw-border-[1px] tw-border-black dark:tw-border-white dark:!tw-text-white"
+          >
+            Choose plan
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="tw-mt-5 tw-flex tw-min-h-[80vh] tw-w-full tw-flex-col tw-place-content-center tw-place-items-center tw-p-[2%] max-lg:tw-p-3"
+    >
+      <h3 class="reveal-up tw-text-4xl tw-font-medium max-md:tw-text-2xl">
+        Read resources by experts ✨
+      </h3>
+      <!-- articles -->
+
+      <div
+        class="reveal-up tw-mt-10 tw-flex tw-flex-wrap tw-place-content-center tw-gap-10 max-lg:tw-flex-col"
+      >
+        <a
+          href="#"
+          class="tw-flex tw-h-[500px] tw-w-[400px] tw-flex-col tw-gap-2 tw-overflow-clip tw-rounded-lg tw-p-4 max-lg:tw-w-[350px]"
+        >
+          <div
+            class="tw-h-[350px] tw-min-h-[350px] tw-w-full tw-overflow-hidden tw-rounded-2xl"
+          >
+            <img
+              src="./assets/images/home/article1.png"
+              alt="article image"
+              class="tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-700 hover:tw-scale-[1.3]"
+              srcset=""
+            />
+          </div>
+
+          <div
+            class="tw-text-gray-600 dark:tw-text-gray-300 tw-justify-between tw-flex tw-gap-2"
+          >
+            <div class="tw-text-gray-800 dark:tw-text-gray-200">
+              Machine learning
+            </div>
+            <div class="tw-text-gray-600 dark:tw-text-gray-400">
+              Jul, 17, 2024
+            </div>
+          </div>
+          <h3 class="tw-mt-1 tw-font-medium tw-text-xl max-md:tw-text-xl">
+            Latest AI tools
+          </h3>
+        </a>
+
+        <a
+          href="#"
+          class="tw-flex tw-h-[500px] tw-w-[400px] tw-flex-col tw-gap-2 tw-overflow-clip tw-rounded-lg tw-p-4 max-lg:tw-w-[350px]"
+        >
+          <div
+            class="tw-h-[350px] tw-min-h-[350px] tw-w-full tw-overflow-hidden tw-rounded-2xl"
+          >
+            <img
+              src="./assets/images/home/article2.jpg"
+              alt="article image"
+              class="tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-700 hover:tw-scale-[1.3]"
+              srcset=""
+            />
+          </div>
+
+          <div
+            class="tw-text-gray-600 dark:tw-text-gray-300 tw-justify-between tw-flex tw-gap-2"
+          >
+            <div class="tw-text-gray-800 dark:tw-text-gray-200">
+              Announcement
+            </div>
+            <div class="tw-text-gray-600 dark:tw-text-gray-400">
+              June, 22, 2024
+            </div>
+          </div>
+          <h3 class="tw-mt-1 tw-font-medium tw-text-xl max-md:tw-text-xl">
+            Pixa Unveils new technology
+          </h3>
+        </a>
+
+        <a
+          href="#"
+          class="tw-flex tw-h-[500px] tw-w-[400px] tw-flex-col tw-gap-2 tw-overflow-clip tw-rounded-lg tw-p-4 max-lg:tw-w-[350px]"
+        >
+          <div
+            class="tw-h-[350px] tw-min-h-[350px] tw-w-full tw-overflow-hidden tw-rounded-2xl"
+          >
+            <img
+              src="./assets/images/home/article3.png"
+              alt="article image"
+              class="tw-h-full tw-w-full tw-object-cover tw-transition-transform tw-duration-700 hover:tw-scale-[1.3]"
+              srcset=""
+            />
+          </div>
+
+          <div
+            class="tw-text-gray-600 dark:tw-text-gray-300 tw-justify-between tw-flex tw-gap-2"
+          >
+            <div class="tw-text-gray-800 dark:tw-text-gray-200">
+              Announcement
+            </div>
+            <div class="tw-text-gray-600 dark:tw-text-gray-400">
+              Apr, 27, 2024
+            </div>
+          </div>
+          <h3 class="tw-mt-1 tw-font-medium tw-text-xl max-md:tw-text-xl">
+            Launching Pixa playground
+          </h3>
+        </a>
+      </div>
+    </section>
+
+    <!-- ================= OCR-SEC FAQ SECTION START ================= -->
+    <section
+      class="tw-relative tw-flex tw-w-full tw-flex-col tw-place-content-center tw-place-items-center tw-gap-[10%] tw-p-[5%] tw-px-[10%]"
+      id="faq"
+    >
+      <h3 class="tw-text-4xl tw-font-medium max-md:tw-text-2xl">
+        Frequently Asked Questions
+      </h3>
+      <div
+        class="tw-mt-5 tw-flex tw-min-h-[300px] tw-w-full tw-max-w-[850px] tw-flex-col tw-gap-4"
+      >
+        <div class="faq tw-w-full">
+          <h4
+            class="faq-accordion tw-flex tw-w-full tw-select-none tw-text-xl max-md:tw-text-lg"
+          >
+            <span>What types of financial documents does OCR-SEC support?</span>
+            <i
+              class="bi bi-plus tw-text-xl tw-origin-center tw-duration-300 tw-transition-transform tw-ml-auto tw-font-semibold"
+            ></i>
+          </h4>
+          <div class="content max-lg:tw-text-sm">
+            OCR-SEC is designed to handle various financial documents including
+            balance sheets, income statements, cash flow statements, and other
+            structured financial reports. Our custom OCR models are specifically
+            trained on financial document layouts for maximum accuracy.
+          </div>
+        </div>
+        <hr />
+
+        <div class="faq tw-w-full">
+          <h4
+            class="faq-accordion tw-flex tw-w-full tw-select-none tw-text-xl max-md:tw-text-lg"
+          >
+            <span>How accurate is the OCR-SEC extraction process?</span>
+            <i
+              class="bi bi-plus tw-text-xl tw-origin-center tw-duration-300 tw-transition-transform tw-ml-auto tw-font-semibold"
+            ></i>
+          </h4>
+          <div class="content max-lg:tw-text-sm">
+            OCR-SEC achieves 99.5% extraction accuracy through our 6-stage
+            pipeline that combines custom OCR models, LLM-powered
+            post-processing, and human-in-the-loop validation. This
+            multi-layered approach ensures precision meets automation.
+          </div>
+        </div>
+        <hr />
+
+        <div class="faq tw-w-full">
+          <h4
+            class="faq-accordion tw-flex tw-w-full tw-select-none tw-text-xl max-md:tw-text-lg"
+          >
+            <span
+              >What export formats are available for the processed data?</span
+            >
+            <i
+              class="bi bi-plus tw-text-xl tw-origin-center tw-duration-300 tw-transition-transform tw-ml-auto tw-font-semibold"
+            ></i>
+          </h4>
+          <div class="content max-lg:tw-text-sm">
+            OCR-SEC supports multiple export formats including CSV, Excel, JSON,
+            and structured text formats. This makes the extracted data ready for
+            research, compliance reporting, or integration with existing
+            financial systems.
+          </div>
+        </div>
+        <hr />
+
+        <div class="faq tw-w-full">
+          <h4
+            class="faq-accordion tw-flex tw-w-full tw-select-none tw-text-xl max-md:tw-text-lg"
+          >
+            <span>How does the LLM-powered chatbot work?</span>
+            <i
+              class="bi bi-plus tw-text-xl tw-origin-center tw-duration-300 tw-transition-transform tw-ml-auto tw-font-semibold"
+            ></i>
+          </h4>
+          <div class="content max-lg:tw-text-sm">
+            Our "Talk to Your Data" feature allows users to query their
+            extracted financial data using natural language. Simply ask
+            questions in plain English like "What was the total revenue in Q3?"
+            and get instant answers without needing technical expertise or SQL
+            knowledge.
+          </div>
+        </div>
+        <hr />
+
+        <div class="faq tw-w-full">
+          <h4
+            class="faq-accordion tw-flex tw-w-full tw-select-none tw-text-xl max-md:tw-text-lg"
+          >
+            <span>Can OCR-SEC handle handwritten financial documents?</span>
+            <i
+              class="bi bi-plus tw-text-xl tw-origin-center tw-duration-300 tw-transition-transform tw-ml-auto tw-font-semibold"
+            ></i>
+          </h4>
+          <div class="content max-lg:tw-text-sm">
+            OCR-SEC is optimized for printed and digitally-generated financial
+            documents. While it can process some handwritten elements, best
+            results are achieved with typed or printed financial statements,
+            forms, and reports.
+          </div>
+        </div>
+        <hr />
+
+        <div class="faq tw-w-full">
+          <h4
+            class="faq-accordion tw-flex tw-w-full tw-select-none tw-text-xl max-md:tw-text-lg"
+          >
+            <span>How does human-in-the-loop validation improve accuracy?</span>
+            <i
+              class="bi bi-plus tw-text-xl tw-origin-center tw-duration-300 tw-transition-transform tw-ml-auto tw-font-semibold"
+            ></i>
+          </h4>
+          <div class="content max-lg:tw-text-sm">
+            Our human validation step allows reviewers to compare the digitized
+            output with the original document image side-by-side, making
+            corrections where needed. This ensures that critical financial data
+            maintains the highest level of accuracy before final export.
+          </div>
+        </div>
+        <hr />
+      </div>
+      <div
+        class="purple-bg-grad max-md:tw-hidden reveal-up tw-absolute tw-bottom-14 tw-right-[20%] tw-h-[150px] tw-w-[150px] tw-rounded-full"
+      ></div>
+    </section>
+    <!-- ================= OCR-SEC FAQ SECTION END ================= -->
+
+    <section
+      class="tw-relative tw-flex tw-p-2 tw-w-full tw-min-h-[60vh] tw-flex-col tw-place-content-center tw-place-items-center tw-overflow-hidden"
+    >
+      <div
+        class="reveal-up tw-w-full tw-h-full tw-min-h-[450px] max-lg:tw-max-w-full tw-rounded-md lg:tw-py-[5%] tw-bg-[#f6f7fb] dark:tw-bg-[#171717] tw-place-content-center tw-items-center tw-flex tw-flex-col tw-max-w-[80%] tw-gap-4 tw-p-4"
+      >
+        <h3
+          class="reveal-up tw-text-5xl tw-font-medium max-md:tw-text-3xl tw-text-center tw-leading-normal"
+        >
+          Access and compare multiple AI models
+        </h3>
+
+        <div class="tw-mt-8 tw-relative tw-flex max-lg:tw-flex-col tw-gap-5">
+          <a
+            href="#"
+            class="btn reveal-up !tw-rounded-full !tw-p-4 tw-font-medium"
+          >
+            Launch Playground
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="tw-flex tw-w-full tw-flex-col tw-place-content-center tw-place-items-center tw-gap-[10%] tw-p-[5%] tw-px-[10%] max-md:tw-px-2"
+    >
+      <div
+        class="tw-flex tw-w-full tw-max-w-[80%] tw-place-content-center tw-place-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-[#F6F7FB] dark:tw-bg-[#171717] tw-p-6 max-md:tw-max-w-full max-md:tw-flex-col"
+      >
+        <div class="tw-flex tw-flex-col max-lg:tw-text-center tw-gap-1">
+          <h2
+            class="tw-text-2xl tw-text-gray-800 dark:tw-text-gray-200 max-md:tw-text-xl"
+          >
+            Join our newsletter
+          </h2>
+          <div class="tw-text-gray-700 dark:tw-text-gray-300">
+            Get product insights and updates.
+          </div>
+        </div>
+
+        <div
+          class="tw-flex tw-h-[60px] tw-place-items-center tw-gap-2 tw-overflow-hidden tw-p-2"
+        >
+          <input
+            type="email"
+            class="input tw-h-full tw-w-full !tw-border-gray-600 tw-p-2 tw-outline-none"
+            placeholder="email"
+          />
+          <a
+            class="btn !tw-rounded-full !tw-border-[1px] !tw-text-black !tw-border-solid !tw-border-black dark:!tw-text-white dark:!tw-border-gray-300 !tw-bg-transparent tw-transition-colors tw-duration-[0.3s]"
+            href=""
+          >
+            Signup
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= OCR-SEC FINAL CTA SECTION START ================= -->
+    <section
+      class="tw-relative tw-flex tw-w-full tw-min-h-[80vh] tw-flex-col tw-place-content-center tw-place-items-center tw-gap-8 tw-p-[5%] tw-bg-gradient-to-br tw-from-blue-50 tw-to-purple-50 dark:tw-from-blue-900/20 dark:tw-to-purple-900/20"
+      id="demo"
+    >
+      <h3
+        class="reveal-up tw-text-5xl tw-font-bold tw-text-center max-md:tw-text-3xl tw-leading-tight"
+      >
+        Ready to Structure Your Chaos?
+      </h3>
+      <p
+        class="reveal-up tw-text-xl tw-text-center tw-text-gray-600 dark:tw-text-gray-300 tw-max-w-[800px] tw-leading-relaxed"
+      >
+        Transform your financial documents from chaotic scans into structured,
+        actionable data. Get started with OCR-SEC today.
+      </p>
+
+      <!-- CTA Buttons -->
+      <div
+        class="reveal-up tw-flex tw-gap-6 tw-flex-wrap tw-justify-center tw-mt-8"
+      >
+        <a
+          href="#"
+          class="tw-group tw-shadow-xl btn tw-flex tw-gap-3 tw-text-lg tw-px-8 tw-py-4 tw-bg-blue-600 hover:tw-bg-blue-700 tw-text-white tw-rounded-xl tw-transition-all tw-duration-300"
+        >
+          <i class="bi bi-download tw-text-xl"></i>
+          <span>Download Research Poster</span>
+          <i
+            class="bi bi-arrow-right tw-duration-300 group-hover:tw-translate-x-1"
+          ></i>
+        </a>
+        <a
+          href="#"
+          class="tw-group tw-shadow-xl tw-border-2 tw-border-blue-600 tw-text-blue-600 dark:tw-text-blue-400 hover:tw-bg-blue-600 hover:tw-text-white tw-flex tw-gap-3 tw-text-lg tw-px-8 tw-py-4 tw-rounded-xl tw-transition-all tw-duration-300"
+        >
+          <i class="bi bi-envelope tw-text-xl"></i>
+          <span>Request Demo Access</span>
+          <i
+            class="bi bi-arrow-right tw-duration-300 group-hover:tw-translate-x-1"
+          ></i>
+        </a>
+      </div>
+
+      <!-- Technology Stack Preview -->
+      <div class="reveal-up tw-mt-16 tw-text-center">
+        <h4
+          class="tw-text-2xl tw-font-semibold tw-mb-8 tw-text-gray-800 dark:tw-text-gray-200"
+        >
+          Powered by cutting-edge technology
+        </h4>
+        <div
+          class="tw-flex tw-justify-center tw-items-center tw-gap-8 tw-flex-wrap tw-max-w-[800px]"
+        >
+          <!-- Technology Icons Placeholder -->
+          <div class="tw-flex tw-flex-col tw-items-center tw-gap-2">
+            <div
+              class="tw-w-16 tw-h-16 tw-bg-gradient-to-br tw-from-orange-400 tw-to-red-500 tw-rounded-lg tw-flex tw-items-center tw-justify-center"
+            >
+              <span class="tw-text-white tw-font-bold tw-text-sm">OCR</span>
+            </div>
+            <span class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-400"
+              >Custom OCR</span
+            >
+          </div>
+          <div class="tw-flex tw-flex-col tw-items-center tw-gap-2">
+            <div
+              class="tw-w-16 tw-h-16 tw-bg-gradient-to-br tw-from-green-400 tw-to-blue-500 tw-rounded-lg tw-flex tw-items-center tw-justify-center"
+            >
+              <span class="tw-text-white tw-font-bold tw-text-sm">LLM</span>
+            </div>
+            <span class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-400"
+              >GPT Agents</span
+            >
+          </div>
+          <div class="tw-flex tw-flex-col tw-items-center tw-gap-2">
+            <div
+              class="tw-w-16 tw-h-16 tw-bg-gradient-to-br tw-from-purple-400 tw-to-pink-500 tw-rounded-lg tw-flex tw-items-center tw-justify-center"
+            >
+              <span class="tw-text-white tw-font-bold tw-text-xs">CV</span>
+            </div>
+            <span class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-400"
+              >Computer Vision</span
+            >
+          </div>
+          <div class="tw-flex tw-flex-col tw-items-center tw-gap-2">
+            <div
+              class="tw-w-16 tw-h-16 tw-bg-gradient-to-br tw-from-yellow-400 tw-to-orange-500 tw-rounded-lg tw-flex tw-items-center tw-justify-center"
+            >
+              <span class="tw-text-white tw-font-bold tw-text-xs">ML</span>
+            </div>
+            <span class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-400"
+              >Machine Learning</span
+            >
+          </div>
+          <div class="tw-flex tw-flex-col tw-items-center tw-gap-2">
+            <div
+              class="tw-w-16 tw-h-16 tw-bg-gradient-to-br tw-from-teal-400 tw-to-blue-600 tw-rounded-lg tw-flex tw-items-center tw-justify-center"
+            >
+              <span class="tw-text-white tw-font-bold tw-text-xs">NLP</span>
+            </div>
+            <span class="tw-text-sm tw-text-gray-600 dark:tw-text-gray-400"
+              >Natural Language</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div
+        class="reveal-up tw-mt-12 tw-text-center tw-p-6 tw-bg-white/50 dark:tw-bg-gray-800/50 tw-rounded-xl tw-backdrop-blur-sm"
+      >
+        <p class="tw-text-gray-600 dark:tw-text-gray-300 tw-mb-2">
+          For research collaborations or technical inquiries:
+        </p>
+        <p class="tw-text-blue-600 dark:tw-text-blue-400 tw-font-semibold">
+          wins@metu.edu.tr
+        </p>
+      </div>
+
+      <!-- Background decorations -->
+      <div
+        class="purple-bg-grad max-md:tw-hidden tw-absolute tw-top-10 tw-left-[10%] tw-h-[100px] tw-w-[100px] tw-rounded-full tw-opacity-30"
+      ></div>
+      <div
+        class="blue-bg-grad max-md:tw-hidden tw-absolute tw-bottom-10 tw-right-[15%] tw-h-[120px] tw-w-[120px] tw-rounded-full tw-opacity-30"
+      ></div>
+    </section>
+    <!-- ================= OCR-SEC FINAL CTA SECTION END ================= -->
+
+    <!-- ================= OCR-SEC FOOTER START ================= -->
+    <footer class="tw-bg-[#0f1012] tw-text-white tw-py-16">
+      <div class="tw-max-w-[1200px] tw-mx-auto tw-px-8">
+        <!-- Footer Top -->
+        <div
+          class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-8 tw-mb-12"
+        >
+          <!-- Project Info -->
+          <div class="tw-col-span-1 lg:tw-col-span-2">
+            <div class="tw-flex tw-items-center tw-gap-3 tw-mb-4">
+              <img
+                src="./assets/logo/logo.png"
+                alt="OCR-SEC Logo"
+                class="tw-h-10 tw-w-10"
+              />
+              <h3 class="tw-text-2xl tw-font-bold">OCR-SEC</h3>
+            </div>
+            <p class="tw-text-gray-300 tw-mb-4 tw-leading-relaxed">
+              Structuring Chaos: LLM-Powered Table Extraction. Transform scanned
+              financial documents into clean, validated, exportable tables with
+              99.5% accuracy.
+            </p>
+            <div class="tw-flex tw-gap-4">
+              <a
+                href="#"
+                class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+              >
+                <i class="bi bi-github tw-text-xl"></i>
+              </a>
+              <a
+                href="#"
+                class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+              >
+                <i class="bi bi-linkedin tw-text-xl"></i>
+              </a>
+              <a
+                href="#"
+                class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+              >
+                <i class="bi bi-envelope tw-text-xl"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div>
+            <h4 class="tw-text-lg tw-font-semibold tw-mb-4">Quick Links</h4>
+            <ul class="tw-space-y-2">
+              <li>
+                <a
+                  href="#features"
+                  class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+                  >Pipeline</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#why"
+                  class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+                  >Why OCR-SEC</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#faq"
+                  class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+                  >FAQ</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#demo"
+                  class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+                  >Demo</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Research -->
+          <div>
+            <h4 class="tw-text-lg tw-font-semibold tw-mb-4">Research</h4>
+            <ul class="tw-space-y-2">
+              <li>
+                <a
+                  href="#"
+                  class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+                  >Download Poster</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+                  >Technical Paper</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+                  >Dataset</a
+                >
+              </li>
+              <li>
+                <a
+                  href="#"
+                  class="tw-text-gray-400 hover:tw-text-white tw-transition-colors tw-duration-300"
+                  >GitHub Repository</a
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Institution & Sponsors -->
+        <div class="tw-border-t tw-border-gray-700 tw-pt-8 tw-mb-8">
+          <div
+            class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-8 tw-items-center"
+          >
+            <!-- Supervisor -->
+            <div class="tw-text-center md:tw-text-left">
+              <h5 class="tw-font-semibold tw-mb-2">Project Supervisor</h5>
+              <p class="tw-text-gray-300">Prof. Fatoş Tunay Yarman Vural</p>
+              <p class="tw-text-sm tw-text-gray-400">
+                Middle East Technical University
+              </p>
+            </div>
+
+            <!-- Institution -->
+            <div class="tw-text-center">
+              <h5 class="tw-font-semibold tw-mb-2">Research Institution</h5>
+              <p class="tw-text-gray-300">METU WINS Lab</p>
+              <p class="tw-text-sm tw-text-gray-400">
+                Web Intelligence & Semantic Computing
+              </p>
+            </div>
+
+            <!-- Sponsors -->
+            <div class="tw-text-center md:tw-text-right">
+              <h5 class="tw-font-semibold tw-mb-2">Sponsors</h5>
+              <p class="tw-text-gray-300">Duke University</p>
+              <p class="tw-text-gray-300">Savronik</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Team -->
+        <div class="tw-border-t tw-border-gray-700 tw-pt-8 tw-mb-8">
+          <h5 class="tw-font-semibold tw-mb-4 tw-text-center">Research Team</h5>
+          <div
+            class="tw-flex tw-flex-wrap tw-justify-center tw-gap-4 tw-text-gray-300"
+          >
+            <span class="tw-text-sm">Atakan Öztarak</span>
+            <span class="tw-text-gray-600">•</span>
+            <span class="tw-text-sm">Aybüke Aksoy</span>
+            <span class="tw-text-gray-600">•</span>
+            <span class="tw-text-sm">Barış Türnüklü</span>
+            <span class="tw-text-gray-600">•</span>
+            <span class="tw-text-sm">Cem Meriç Şefikoğulları</span>
+            <span class="tw-text-gray-600">•</span>
+            <span class="tw-text-sm">Emre Kalkan</span>
+          </div>
+        </div>
+
+        <!-- Copyright -->
+        <div
+          class="tw-border-t tw-border-gray-700 tw-pt-8 tw-flex tw-flex-col md:tw-flex-row tw-justify-between tw-items-center tw-text-sm tw-text-gray-400"
+        >
+          <p>
+            © 2025 WINS Lab, Middle East Technical University. All Rights
+            Reserved.
+          </p>
+          <div class="tw-flex tw-gap-6 tw-mt-4 md:tw-mt-0">
+            <a
+              href="#"
+              class="hover:tw-text-white tw-transition-colors tw-duration-300"
+              >Privacy Policy</a
+            >
+            <a
+              href="#"
+              class="hover:tw-text-white tw-transition-colors tw-duration-300"
+              >Terms of Use</a
+            >
+            <a
+              href="#"
+              class="hover:tw-text-white tw-transition-colors tw-duration-300"
+              >Contact</a
+            >
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- ================= OCR-SEC FOOTER END ================= -->
+  </body>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.0/gsap.min.js"
+    integrity="sha512-B1lby8cGcAUU3GR+Fd809/ZxgHbfwJMp0jLTVfHiArTuUt++VqSlJpaJvhNtRf3NERaxDNmmxkdx2o+aHd4bvw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.0/ScrollTrigger.min.js"
+    integrity="sha512-AY2+JxnBETJ0wcXnLPCcZJIJx0eimyhz3OJ55k2Jx4RtYC+XdIi2VtJQ+tP3BaTst4otlGG1TtPJ9fKrAUnRdQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.10/typed.min.js"
+    integrity="sha512-hIlMpy2enepx9maXZF1gn0hsvPLerXoLHdb095CmRY5HG3bZfN7XPBZ14g+TUDH1aGgfLyPHmY9/zuU53smuMw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+
+  <script src="./scripts/components.js"></script>
+  <script src="./index.js"></script>
+
+  <!-- By Paul: https://github.com/PaulleDemon -->
+</html>
